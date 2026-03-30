@@ -1,11 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { motion, AnimatePresence, useInView, useScroll, useTransform } from 'framer-motion';
 import {
   Calendar, Clock, User, Phone, CheckCircle2,
   MapPin, Scissors, Sparkles, Star, ChevronRight, Menu,
   Loader2, ChevronLeft, X, Heart, Globe, Play, Lock,
-  Search, Filter, Trash2, Check, XCircle, Eye
+  Search, Filter, Trash2, Check, XCircle, Eye,
+  Flower, Plus, Tag, Coins, Edit2
 } from 'lucide-react';
+
+const IconMapping = {
+  Sparkles, Scissors, Star, Heart, Flower
+};
+
+const DEFAULT_SERVICES = [
+  { id: 'srv-1', name: 'Signature Glam Makeup', description: 'Flawless glam makeup for any occasion.', price: '1500 ETB', duration: '60 min', rating: '5.0', iconName: 'Sparkles', colorClass: "icon-pink", tag: 'Popular', category: 'Makeup' },
+  { id: 'srv-2', name: 'Bridal Supreme', description: 'Our comprehensive bridal preparation package.', price: '5000 ETB', duration: '120 min', rating: '5.0', iconName: 'Star', colorClass: "icon-amber", tag: 'Best', category: 'Makeup' },
+  { id: 'srv-m3', name: 'Everyday Natural Look', description: 'Subtle, glowing makeup for daytime wear.', price: '800 ETB', duration: '40 min', rating: '4.8', iconName: 'Flower', colorClass: "icon-blue", tag: 'Quick', category: 'Makeup' },
+  { id: 'srv-m4', name: 'Event & Party Glam', description: 'Bold and striking makeup for special events.', price: '1200 ETB', duration: '50 min', rating: '4.9', iconName: 'Heart', colorClass: "icon-purple", tag: 'Hot', category: 'Makeup' },
+  
+  { id: 'srv-3', name: 'Expert Hair Styling', description: 'Expert styling, treatments, and elegant cuts.', price: '800 ETB', duration: '45 min', rating: '4.9', iconName: 'Scissors', colorClass: "icon-amber", tag: 'Best', category: 'Hair' },
+  { id: 'srv-4', name: 'Silk Press Blowout', description: 'Silky smooth blowout for lasting volume.', price: '600 ETB', duration: '30 min', rating: '4.8', iconName: 'Heart', colorClass: "icon-pink", tag: 'Hot', category: 'Hair' },
+  { id: 'srv-h3', name: 'Deep Conditioning SPA', description: 'Nourishing treatment for damaged and dry hair.', price: '1000 ETB', duration: '60 min', rating: '5.0', iconName: 'Sparkles', colorClass: "icon-blue", tag: 'Relax', category: 'Hair' },
+  { id: 'srv-h4', name: 'Signature Hair Cut', description: 'Precision styling tailored perfectly to you.', price: '700 ETB', duration: '40 min', rating: '4.9', iconName: 'Scissors', colorClass: "icon-purple", tag: 'Popular', category: 'Hair' },
+
+  { id: 'srv-5', name: 'Ombre Nails', description: 'Stunning seamless ombré nail art designs.', price: '1200 ETB', duration: '90 min', rating: '4.9', iconName: 'Star', colorClass: "icon-purple", tag: 'Hot', category: 'Nails' },
+  { id: 'srv-6', name: 'Classic Nail Care', description: 'Extensive care, health, and natural beauty.', price: '400 ETB', duration: '30 min', rating: '4.8', iconName: 'Heart', colorClass: "icon-blue", tag: 'New', category: 'Nails' },
+  { id: 'srv-7', name: 'Gel Extensions', description: 'Durable gel extensions with custom shapes.', price: '1500 ETB', duration: '120 min', rating: '4.9', iconName: 'Sparkles', colorClass: "icon-purple", tag: 'Popular', category: 'Nails' },
+  { id: 'srv-8', name: 'Luxury Pedicure', description: 'Relaxing foot spa and premium polish.', price: '800 ETB', duration: '60 min', rating: '5.0', iconName: 'Flower', colorClass: "icon-pink", tag: 'Relax', category: 'Nails' },
+];
 
 const Instagram = ({ size = 24, className = "" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -415,7 +437,10 @@ const ServiceCard = ({ service, onClick, delayIndex, promo }) => {
     >
       <div className="service-tag">{service.tag}</div>
       <motion.div layoutId={`service-icon-${service.id}`} className={`service-icon ${service.colorClass}`}>
-        {React.cloneElement(service.icon, { size: 32 })}
+        {(() => {
+          const IconComponent = IconMapping[service.iconName] || Star;
+          return <IconComponent size={32} />;
+        })()}
       </motion.div>
       <motion.h4 layoutId={`service-title-${service.id}`} className="service-name">{service.name}</motion.h4>
       <p className="service-price">
@@ -432,6 +457,29 @@ const ServiceCard = ({ service, onClick, delayIndex, promo }) => {
         <div className="meta-item"><Clock size={16} /> {service.duration}</div>
         <div className="rating-badge"><Star size={12} fill="currentColor" /> {service.rating}</div>
       </div>
+    </motion.div>
+  );
+};
+
+const RotatingFlower = () => {
+  const { scrollYProgress } = useScroll();
+  const rotation = useTransform(scrollYProgress, [0, 1], [0, 720]);
+
+  return (
+    <motion.div
+      style={{
+        position: 'fixed',
+        right: '32px',
+        bottom: '32px',
+        rotate: rotation,
+        zIndex: 50,
+        pointerEvents: 'none',
+        color: 'var(--color-primary, #EC4899)',
+        opacity: 0.85,
+        filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))'
+      }}
+    >
+      <Flower size={48} strokeWidth={1.5} />
     </motion.div>
   );
 };
@@ -490,6 +538,8 @@ const App = () => {
   ]);
   const [appointmentsOpen, setAppointmentsOpen] = useState(false);
   const [promoOpen, setPromoOpen] = useState(false);
+  const [servicesOpen, setServicesOpen] = useState(false);
+  const [newService, setNewService] = useState({ name: '', description: '', price: '', duration: '', rating: '5.0', iconName: 'Star', colorClass: 'icon-pink', tag: '', category: 'Nails' });
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [storeStatusOpen, setStoreStatusOpen] = useState(false);
   const [hoursOpen, setHoursOpen] = useState(false);
@@ -551,20 +601,8 @@ const App = () => {
 
   // Slider state
   const [currentImg, setCurrentImg] = useState(0);
-  const DEFAULT_HERO_IMAGES = [
-    "/gallery/ethiopian_nails_1_1774808461555.png",
-    "/gallery/ethiopian_makeup_2_1774808475506.png",
-    "/gallery/ethiopian_salon_3_1774808491303.png",
-    "/gallery/ethiopian_aesthetic_4_1774808504169.png"
-  ];
-  const DEFAULT_ARTISTRY_IMAGES = [
-    { url: "https://images.unsplash.com/photo-1516975080661-464aef25139a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80", alt: "Beautiful Nails", tall: true },
-    { url: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80", alt: "Flawless Makeup", tall: false },
-    { url: "https://images.unsplash.com/photo-1599839619722-39751411ea63?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80", alt: "Ombre & Ink", tall: true },
-    { url: "https://images.unsplash.com/photo-1560014792-7fabe05a5a14?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80", alt: "Beauty Aesthetic", tall: false },
-    { url: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80", alt: "Hair Styling", tall: true },
-    { url: "https://images.unsplash.com/photo-1616683693504-3ea7e9ad6ece?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80", alt: "Tattoo Art", tall: false },
-  ];
+  const DEFAULT_HERO_IMAGES = [];
+  const DEFAULT_ARTISTRY_IMAGES = [];
   const [heroImages, setHeroImages] = useState(DEFAULT_HERO_IMAGES);
   const [artistryImages, setArtistryImages] = useState(DEFAULT_ARTISTRY_IMAGES);
   const [galleryUploading, setGalleryUploading] = useState({ hero: false, artistry: false });
@@ -632,6 +670,15 @@ const App = () => {
             if (data.artistryImages && data.artistryImages.length > 0) setArtistryImages(data.artistryImages);
           }
         } catch (e) { console.warn('Could not load gallery from Firestore', e); }
+
+        // Load services
+        try {
+          const servicesDoc = await getDoc(doc(firestoreDb, 'settings', 'services'));
+          if (servicesDoc.exists()) {
+            const data = servicesDoc.data();
+            if (data.items && data.items.length > 0) setServices(data.items);
+          }
+        } catch (e) { console.warn('Could not load services from Firestore', e); }
       } catch (e) { console.error(e); }
     };
     initFirebase();
@@ -652,6 +699,28 @@ const App = () => {
       await setDoc(doc(currentDb, 'settings', 'gallery'), { heroImages: heroImgs, artistryImages: artistryImgs });
       console.log('Gallery saved to Firestore successfully');
     } catch (e) { console.error('Could not save gallery to Firestore:', e); }
+  };
+
+  const saveServicesToFirestore = async (newServices) => {
+    const currentDb = dbRef.current;
+    if (!currentDb || currentDb.isMock) return;
+    try {
+      await setDoc(doc(currentDb, 'settings', 'services'), { items: newServices });
+    } catch (e) { console.error('Could not save services', e); }
+  };
+
+  const handleAddService = () => {
+    if (!newService.name || !newService.price) return;
+    const upd = [...services, { ...newService, id: `srv-${Date.now()}` }];
+    setServices(upd);
+    saveServicesToFirestore(upd);
+    setNewService({ name: '', description: '', price: '', duration: '', rating: '5.0', iconName: 'Star', colorClass: 'icon-pink', tag: '', category: 'Nails' });
+  };
+
+  const handleDeleteService = (id) => {
+    const upd = services.filter(s => s.id !== id);
+    setServices(upd);
+    saveServicesToFirestore(upd);
   };
 
   // Upload images to Firebase Storage
@@ -732,13 +801,7 @@ const App = () => {
       saveGalleryToFirestore(heroImages, DEFAULT_ARTISTRY_IMAGES);
     }
   };
-
-  const services = [
-    { id: 1, name: lang === 'am' ? 'ሜካፕ' : 'Makeup', description: 'Flawless glam makeup for any occasion.', price: '1500 ETB', duration: '60 min', rating: '5.0', icon: <Sparkles />, colorClass: "icon-pink", tag: 'Popular' },
-    { id: 2, name: lang === 'am' ? 'የፀጉር አሰራር' : 'Hair Styling', description: 'Expert styling, treatments, and elegant cuts.', price: '800 ETB', duration: '45 min', rating: '4.9', icon: <Scissors />, colorClass: "icon-amber", tag: 'Best' },
-    { id: 3, name: lang === 'am' ? 'ኦምብሬ ጥፍር' : 'Ombre Nails', description: 'Stunning seamless ombré nail art designs.', price: '1200 ETB', duration: '90 min', rating: '4.9', icon: <Star />, colorClass: "icon-purple", tag: 'Hot' },
-    { id: 4, name: lang === 'am' ? 'የጥፍር እንክብካቤ' : 'Classic Nail Care', description: 'Extensive care, health, and natural beauty.', price: '400 ETB', duration: '30 min', rating: '4.8', icon: <Heart />, colorClass: "icon-blue", tag: 'New' },
-  ];
+  const [services, setServices] = useState(DEFAULT_SERVICES);
 
   const handleBooking = async (e) => {
     e.preventDefault();
@@ -768,6 +831,7 @@ const App = () => {
 
   return (
     <div className="app-wrapper">
+      <RotatingFlower />
       {/* Animated Blobs Background */}
       <div className="bg-blobs">
         <div className="bg-blob blob-1"></div>
@@ -1005,17 +1069,20 @@ const App = () => {
                 <div className="slider-container">
                   <div className="slider-glass-frame">
                     <div className="slider-inner">
-                      {heroImages.map((img, idx) => (
-                        <div key={idx} className={`slide ${idx === currentImg ? 'active' : ''}`}>
-                          <img src={img} alt="Salon look" />
-                          <div className="slide-overlay"></div>
-                        </div>
-                      ))}
-
-                      <div className="slider-controls">
-                        <button onClick={prevImg} className="btn-nav"><ChevronLeft size={24} /></button>
-                        <button onClick={nextImg} className="btn-nav"><ChevronRight size={24} /></button>
-                      </div>
+                      {heroImages.length > 0 ? (
+                        <>
+                          {heroImages.map((img, idx) => (
+                            <div key={idx} className={`slide ${idx === currentImg ? 'active' : ''}`}>
+                              <img src={img} alt="Salon look" />
+                              <div className="slide-overlay"></div>
+                            </div>
+                          ))}
+                          <div className="slider-controls">
+                            <button onClick={prevImg} className="btn-nav"><ChevronLeft size={24} /></button>
+                            <button onClick={nextImg} className="btn-nav"><ChevronRight size={24} /></button>
+                          </div>
+                        </>
+                      ) : null}
                     </div>
                   </div>
                 </div>
@@ -1025,7 +1092,7 @@ const App = () => {
               <div className="stats-bar">
                 <AnimatedStat end={1200} suffix="+" label="Happy Clients" />
                 <AnimatedStat end="4.9/5" suffix=" ⭐" label="Average Rating" />
-                <AnimatedStat end={2020} label="Years of Beauty" />
+                <AnimatedStat end={2024} label="Years of Beauty" />
               </div>
 
               {/* Service Grid Section */}
@@ -1034,14 +1101,26 @@ const App = () => {
                   initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.8 }}
                   className="section-header"
                 >
-                  <h3 className="section-title">Popular Services</h3>
+                  <h3 className="section-title">Our Services</h3>
                   <p className="section-subtitle">Premium treatments crafted with detail and care by Sona.</p>
                 </motion.div>
 
-                <div className="services-grid">
-                  {services.map((service, idx) => (
-                    <ServiceCard key={service.id} service={service} delayIndex={idx} onClick={() => setSelectedService(service)} promo={promo} />
-                  ))}
+                <div className="services-container" style={{ display: 'flex', flexDirection: 'column', gap: '64px', width: '100%' }}>
+                  {Array.from(new Set(services.map(s => s.category || 'Other'))).map((category, catIdx) => {
+                    const catServices = services.filter(s => (s.category || 'Other') === category);
+                    return (
+                      <div key={category} className="service-category-block" style={{ width: '100%' }}>
+                        <h4 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-text)' }}>
+                          <Sparkles size={24} style={{ color: 'var(--color-primary)' }} /> {category}
+                        </h4>
+                        <div className="services-grid">
+                          {catServices.map((service, idx) => (
+                            <ServiceCard key={service.id} service={service} delayIndex={idx} onClick={() => setSelectedService(service)} promo={promo} />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -1069,23 +1148,25 @@ const App = () => {
                   <p className="section-subtitle">A glimpse into our daily masterpieces.</p>
                 </motion.div>
                 <div className="gallery-grid">
-                  {artistryImages.map((item, idx) => (
-                    <motion.div key={idx} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.08 * (idx + 1), duration: 0.5 }} className={`gallery-item${item.tall ? ' tall' : ''}`}>
-                      {/* Corner bracket accents — outside the inner clip */}
-                      <div className="gallery-corner tl" />
-                      <div className="gallery-corner tr" />
-                      <div className="gallery-corner bl" />
-                      <div className="gallery-corner br" />
-                      {/* Inner wrapper clips image to card bounds, not touching the outer border */}
-                      <div className="gallery-inner">
-                        <img src={item.url} alt={item.alt} />
-                        <div className="gallery-overlay">
-                          <Heart size={36} />
-                          <span className="gallery-overlay-label">{item.alt}</span>
+                  {artistryImages.length > 0 ? (
+                    artistryImages.map((item, idx) => (
+                      <motion.div key={idx} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.08 * (idx + 1), duration: 0.5 }} className={`gallery-item${item.tall ? ' tall' : ''}`}>
+                        {/* Corner bracket accents — outside the inner clip */}
+                        <div className="gallery-corner tl" />
+                        <div className="gallery-corner tr" />
+                        <div className="gallery-corner bl" />
+                        <div className="gallery-corner br" />
+                        {/* Inner wrapper clips image to card bounds, not touching the outer border */}
+                        <div className="gallery-inner">
+                          <img src={item.url} alt={item.alt} />
+                          <div className="gallery-overlay">
+                            <Heart size={36} />
+                            <span className="gallery-overlay-label">{item.alt}</span>
+                          </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                      </motion.div>
+                    ))
+                  ) : null}
                 </div>
               </div>
 
@@ -1316,6 +1397,92 @@ const App = () => {
                     </div>
                   </div>
 
+                  {/* Services Management */}
+                  <div style={{ backgroundColor: '#1E293B', borderRadius: '1.5rem', marginBottom: '32px', border: '1px solid #334155', overflow: 'hidden' }}>
+                    <button
+                      onClick={() => setServicesOpen(o => !o)}
+                      style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '24px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Scissors size={18} color="#A78BFA" />
+                        <h3 style={{ fontSize: '1.25rem', color: '#F8FAFC', margin: 0 }}>Manage Services</h3>
+                      </div>
+                      <ChevronRight size={18} style={{ color: '#EC4899', transform: servicesOpen ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }} />
+                    </button>
+                    <AnimatePresence>
+                      {servicesOpen && (
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease: 'easeInOut' }} style={{ overflow: 'hidden' }}>
+                          <div style={{ padding: '0 28px 24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                              {services.map(s => (
+                                <div key={s.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '12px' }}>
+                                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <div style={{ fontSize: '1rem', fontWeight: 600, color: '#fff' }}>[{s.category || 'Other'}] {s.name}</div>
+                                    <input 
+                                      type="text" 
+                                      value={s.description || ''} 
+                                      placeholder="Service Description..."
+                                      onChange={(e) => {
+                                        const upd = services.map(srv => srv.id === s.id ? { ...srv, description: e.target.value } : srv);
+                                        setServices(upd);
+                                        saveServicesToFirestore(upd);
+                                      }}
+                                      style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: '#CBD5E1', padding: '6px 10px', borderRadius: '4px', fontSize: '0.85rem', width: '100%', margin: 0, outline: 'none' }}
+                                    />
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                      <input 
+                                        type="text" 
+                                        value={s.price} 
+                                        onChange={(e) => {
+                                          const upd = services.map(srv => srv.id === s.id ? { ...srv, price: e.target.value } : srv);
+                                          setServices(upd);
+                                          saveServicesToFirestore(upd);
+                                        }}
+                                        style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: '#A78BFA', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', width: '100px', margin: 0 }}
+                                      />
+                                      <span style={{ fontSize: '0.8rem', color: '#888' }}>&bull; {s.duration}</span>
+                                    </div>
+                                  </div>
+                                  <button onClick={() => handleDeleteService(s.id)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', padding: '8px', zIndex: 10 }}><Trash2 size={18} /></button>
+                                </div>
+                              ))}
+                            </div>
+                            
+                            <hr style={{ borderColor: 'rgba(255,255,255,0.1)' }} />
+                            
+                            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', alignItems: 'end' }}>
+                              <input type="text" placeholder="Service Name" value={newService.name} onChange={(e) => setNewService({ ...newService, name: e.target.value })} className="form-input" style={{ margin: 0 }} />
+                              <input type="text" placeholder="Price (e.g., 500 ETB)" value={newService.price} onChange={(e) => setNewService({ ...newService, price: e.target.value })} className="form-input" style={{ margin: 0 }} />
+                              <input type="text" placeholder="Duration (e.g., 45 min)" value={newService.duration} onChange={(e) => setNewService({ ...newService, duration: e.target.value })} className="form-input" style={{ margin: 0 }} />
+                              <input type="text" placeholder="Description" value={newService.description} onChange={(e) => setNewService({ ...newService, description: e.target.value })} className="form-input" style={{ margin: 0 }} />
+                              <select value={newService.category} onChange={(e) => setNewService({ ...newService, category: e.target.value })} className="form-input" style={{ margin: 0 }}>
+                                <option value="Nails">Nails</option>
+                                <option value="Hair">Hair</option>
+                                <option value="Makeup">Makeup</option>
+                              </select>
+                              <select value={newService.iconName} onChange={(e) => setNewService({ ...newService, iconName: e.target.value })} className="form-input" style={{ margin: 0 }}>
+                                <option value="Sparkles">Sparkles Icon</option>
+                                <option value="Scissors">Scissors Icon</option>
+                                <option value="Star">Star Icon</option>
+                                <option value="Heart">Heart Icon</option>
+                                <option value="Flower">Flower Icon</option>
+                              </select>
+                              <select value={newService.tag} onChange={(e) => setNewService({ ...newService, tag: e.target.value })} className="form-input" style={{ margin: 0 }}>
+                                <option value="">No Badge</option>
+                                <option value="Popular">Popular</option>
+                                <option value="New">New</option>
+                                <option value="Hot">Hot</option>
+                                <option value="Best">Best</option>
+                                <option value="Relax">Relax</option>
+                              </select>
+                              <button onClick={handleAddService} className="btn-primary" style={{ padding: '14px', width: '100%' }}><Plus size={20} /> Add</button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
                   {/* Promo Banner Management */}
                   <div style={{ backgroundColor: '#1E293B', borderRadius: '1.5rem', marginBottom: '32px', border: '1px solid #334155', overflow: 'hidden' }}>
                     <button
@@ -1451,9 +1618,15 @@ const App = () => {
                     {/* Header - always visible clickable summary */}
                     <button
                       onClick={() => setAppointmentsOpen(o => !o)}
-                      style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '24px 28px', display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}
+                      style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '24px 28px', display: 'flex', alignItems: 'center', gap: '32px', flexWrap: 'wrap' }}
                     >
-                      <div style={{ display: 'flex', gap: '24px', flex: 1, flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 'fit-content' }}>
+                        <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(167, 139, 250, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Calendar size={20} color="#A78BFA" />
+                        </div>
+                        <h3 style={{ fontSize: '1.25rem', color: '#F8FAFC', margin: 0, fontWeight: 800 }}>Appointments</h3>
+                      </div>
+                      <div style={{ display: 'flex', gap: '24px', flex: 1, flexWrap: 'wrap', borderLeft: '1px solid rgba(255,255,255,0.08)', paddingLeft: '32px' }}>
                         <div style={{ textAlign: 'left' }}><p style={{ fontSize: '0.65rem', color: '#64748B', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', margin: '0 0 4px' }}>Total</p><p style={{ fontSize: '1.8rem', fontWeight: 900, color: '#F8FAFC', margin: 0, lineHeight: 1 }}>{appointments.length}</p></div>
                         <div style={{ textAlign: 'left' }}><p style={{ fontSize: '0.65rem', color: '#64748B', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', margin: '0 0 4px' }}>Pending</p><p style={{ fontSize: '1.8rem', fontWeight: 900, color: '#F59E0B', margin: 0, lineHeight: 1 }}>{appointments.filter(a => a.status === 'pending').length}</p></div>
                         <div style={{ textAlign: 'left' }}><p style={{ fontSize: '0.65rem', color: '#64748B', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', margin: '0 0 4px' }}>Confirmed</p><p style={{ fontSize: '1.8rem', fontWeight: 900, color: '#10B981', margin: 0, lineHeight: 1 }}>{appointments.filter(a => a.status === 'confirmed').length}</p></div>
@@ -1821,6 +1994,13 @@ const App = () => {
               <p>JACROSS • ADDIS ABABA</p>
             </div>
             <p className="footer-copy">&copy; 2026 / ET 2018 SONA SALON. ALL RIGHTS RESERVED.</p>
+            <p style={{ marginTop: '16px', fontSize: '0.8rem', color: 'var(--color-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+              Made with 
+              <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+                <Heart size={14} fill="#EC4899" color="#EC4899" />
+              </motion.div> 
+              by AS
+            </p>
           </div>
         </div>
       </footer>
