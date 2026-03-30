@@ -1333,7 +1333,7 @@ a {
   font-family: var(--font-display);
   font-weight: 900;
   font-size: 1.25rem;
-  color: var(--color-dark);
+  color: var(--color-text);
   margin-bottom: 8px;
   text-align: center;
   text-transform: uppercase;
@@ -2354,7 +2354,22 @@ a {
   }
 
   .services-grid {
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 16px;
+    margin: 0 -24px;
+    padding: 0 24px 32px 24px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .services-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .service-card {
+    min-width: 300px;
+    flex: 0 0 auto;
+    scroll-snap-align: center;
   }
 
   .stats-bar {
@@ -2409,6 +2424,28 @@ a {
 
   .nav-wrapper {
     padding: 0 16px;
+  }
+
+  /* STRICLY ENFORCED MOBILE CAROUSEL */
+  .services-grid {
+    display: flex !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    gap: 16px !important;
+    margin: 0 -24px !important;
+    padding: 0 24px 32px 24px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+  .services-grid::-webkit-scrollbar {
+    display: none !important;
+  }
+  .services-grid > .service-card {
+    min-width: 85vw !important; /* Almost full width but peeks the next card */
+    max-width: 380px !important;
+    flex: 0 0 auto !important;
+    scroll-snap-align: center !important;
+    padding: 24px 20px !important;
   }
 }
 
