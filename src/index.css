@@ -2239,12 +2239,26 @@ a {
     letter-spacing: 0.15em;
   }
 
-  /* Services: single column */
+  /* Services: swipeable carousel on mobile */
   .services-grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 16px;
+    margin: 0 -16px;
+    padding: 0 16px 24px 16px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .services-grid::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
   }
 
   .service-card {
+    min-width: 280px;
+    flex: 0 0 auto;
+    scroll-snap-align: center;
     padding: 28px 20px;
   }
 
